@@ -1,0 +1,17 @@
+{
+  "name": "N-Body Universe",
+  "short_name": "N-Body",
+  "description": "A REBOUND-powered gravitational sandbox with orbital harmonics.",
+  "start_url": "/n-body-universe/",
+  "scope": "/n-body-universe/",
+  "display": "standalone",
+  "background_color": "#06111d",
+  "theme_color": "#06111d",
+  "icons": [
+    {
+      "src": "/n-body-universe/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ]
+}

@@ -1,0 +1,11 @@
+coverage/
+docs/assets/
+docs/404.html
+docs/favicon.svg
+docs/index.html
+docs/manifest.webmanifest
+docs/sw.js
+docs/wasm/
+node_modules/
+public/wasm/
+vendor/
