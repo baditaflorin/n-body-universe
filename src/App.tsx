@@ -74,6 +74,10 @@ export function App() {
   const [dropMode, setDropMode] = useState(false);
   const [rendererMode, setRendererMode] = useState<RendererMode>("webgl");
   const [selectedBodyId, setSelectedBodyId] = useState<number | null>(null);
+  const [commitInfo, setCommitInfo] = useState({
+    short: buildInfo.commit,
+    full: buildInfo.fullCommit,
+  });
   const [toasts, setToasts] = useState<ToastMessage[]>([]);
   const [fps, setFps] = useState(0);
   const workerRef = useRef<{ api: SimulationWorkerRemote; dispose: () => void } | null>(null);
@@ -338,6 +342,32 @@ export function App() {
     };
   }, []);
 
+  useEffect(() => {
+    const controller = new AbortController();
+    async function loadLatestCommit() {
+      try {
+        const response = await fetch(
+          `${buildInfo.repoUrl.replace("github.com", "api.github.com/repos")}/commits/main`,
+          {
+            signal: controller.signal,
+          },
+        );
+        if (!response.ok) {
+          return;
+        }
+        const payload = (await response.json()) as { sha?: string };
+        if (payload.sha) {
+          setCommitInfo({ short: payload.sha.slice(0, 12), full: payload.sha });
+        }
+      } catch {
+        // Static fallback remains visible when the public GitHub API is unavailable.
+      }
+    }
+
+    void loadLatestCommit();
+    return () => controller.abort();
+  }, []);
+
   return (
     <main className="min-h-screen bg-[#06111d] text-slate-100">
       <ToastStack
@@ -355,11 +385,11 @@ export function App() {
               REBOUND {snapshot?.reboundVersion ?? "WASM"} · v{buildInfo.version} ·{" "}
               <a
                 className="text-cyan-200 hover:text-cyan-100"
-                href={`${buildInfo.repoUrl}/commit/${buildInfo.fullCommit}`}
+                href={`${buildInfo.repoUrl}/commit/${commitInfo.full}`}
                 rel="noreferrer"
                 target="_blank"
               >
-                {buildInfo.commit}
+                {commitInfo.short}
               </a>
             </p>
           </div>

@@ -10,7 +10,7 @@ Mode A has no backend data pipeline, but the app still ships static presets, app
 
 ## Decision
 
-Store small curated universe presets in TypeScript modules under `src/features/simulation/presets.ts`. Store build metadata in generated compile-time constants. Store the REBOUND WASM bridge in `public/wasm/` with source in `src/wasm/` and `vendor/rebound/`.
+Store small curated universe presets in TypeScript modules under `src/features/simulation/presets.ts`. Store app version in compile-time constants. Resolve the current public `main` commit through the unauthenticated GitHub commits API with a static fallback. Store the REBOUND WASM bridge in `public/wasm/` with source in `src/wasm/` and `vendor/rebound/`.
 
 ## Consequences
 

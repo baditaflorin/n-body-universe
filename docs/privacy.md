@@ -8,7 +8,7 @@ The app stores only local browser state when the user saves a universe:
 - body positions and velocities
 - simulation settings
 
-No data is sent to a backend because there is no backend. External links go to:
+No data is sent to a project backend because there is no backend. The app may request the public GitHub commits API to show the latest `main` commit. External links go to:
 
 https://github.com/baditaflorin/n-body-universe
 
