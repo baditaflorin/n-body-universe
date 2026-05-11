@@ -57,16 +57,39 @@ export class ReboundKernel {
     const base = import.meta.env.BASE_URL;
     const moduleUrl = new URL(`${base}wasm/rebound_module.js`, self.location.origin).toString();
     const wasmBase = new URL(`${base}wasm/`, self.location.origin).toString();
-    const imported = (await import(/* @vite-ignore */ moduleUrl)) as { default: ModuleFactory };
-    this.module = await imported.default({
-      locateFile: (path) => `${wasmBase}${path}`,
-      print: () => undefined,
-      printErr: (text) => {
-        if (import.meta.env.DEV) {
-          console.warn(text);
-        }
-      },
-    });
+
+    let imported: { default: ModuleFactory };
+    try {
+      imported = (await import(/* @vite-ignore */ moduleUrl)) as { default: ModuleFactory };
+    } catch (cause) {
+      // The most common deploy mistake is shipping the page without the
+      // wasm/ directory. Surface a message that points at it instead of the
+      // raw "failed to fetch dynamic module" string from the runtime.
+      throw new Error(
+        `Could not load REBOUND WebAssembly module at ${moduleUrl}. ` +
+          `Confirm public/wasm/rebound_module.{js,wasm} is present in the build output.`,
+        { cause: cause instanceof Error ? cause : undefined },
+      );
+    }
+
+    try {
+      this.module = await imported.default({
+        locateFile: (path) => `${wasmBase}${path}`,
+        print: () => undefined,
+        printErr: (text) => {
+          if (import.meta.env.DEV) {
+            console.warn(text);
+          }
+        },
+      });
+    } catch (cause) {
+      throw new Error(
+        `REBOUND WebAssembly module failed to instantiate. The browser may lack ` +
+          `WebAssembly support, or the .wasm file at ${wasmBase}rebound_module.wasm ` +
+          `is missing or corrupted.`,
+        { cause: cause instanceof Error ? cause : undefined },
+      );
+    }
 
     this.reset = this.module.cwrap("nu_reset", null, ["number", "number", "number"]);
     this.add = this.module.cwrap("nu_add_particle", "number", [
